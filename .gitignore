@@ -4,3 +4,6 @@ FW/gohei_system3/GettingStarted.html
 FW/gohei_system3/Make.log
 FW/gohei_system3/.vscode/.cortex-debug.peripherals.state.json
 FW/gohei_system3/.vscode/.cortex-debug.registers.state.json
+LCDTest/build/
+LCDTest/Debug/
+*.un~
