@@ -1,6 +1,26 @@
 #include "mbed.h"
 #include "LCDDriver.h"
 #include "ThermistorCalculator.h"
+#include "stdlib.h"
+#include "stdio.h"
+
+//システムステータス
+typedef enum{
+    SYSTEM_SETTING,
+    SYSTEM_OPERATING
+}SystemStatus_t;
+
+//オペレーティングステータス
+typedef enum{
+    FAN_COOLING,
+    NATURAL_COOLING,
+    HEATING
+}OperatingStatus_t;
+
+
+const int PIN_STATUS_HIGH = 1;
+const int PIN_STATUS_LOW = 0;
+
 
 //LCD周り
 BusOut lcdDataBus(p21, p22, p23, p24, p25, p26, p27, p28);
@@ -18,6 +38,14 @@ DigitalIn settingUpSwitch(p6);
 DigitalIn settingDownSwitch(p7);
 DigitalIn uvControlSwitch(p8);
 
+const int SETTING_SWITCH_SETTING = PIN_STATUS_HIGH;
+const int SETTING_SWITCH_OPERATING = PIN_STATUS_LOW;
+
+const int SETTING_SWITCH_PUSHED = PIN_STATUS_LOW;
+
+const int UV_SWITCH_ON = PIN_STATUS_HIGH;
+const int UV_SWITCH_OFF = PIN_STATUS_LOW;
+
 //制御線周り
 DigitalOut heaterControl(p9);
 DigitalOut uvControl(p10);
@@ -34,13 +62,38 @@ const double R_SERIES = 10000.0;
 ThermistorCalculator thermoCalculator(B_CONST, R_ROOM);
 double measureTemperature();
 
-int main() {
-    while(1) {
-        //スイッチ状態監視
+//operatingAction
+double targetTemperature = 25.0;
+double targetTemperatureLowerLimit = 20;
+double targetTemperatureUpperLimit = 35;
+double dangerZone = 40.0;
+double deadZone = 1.0;
+void operatingAction();
+Timer timer;
+float operatingPeriod = 1;//3秒周期制御
 
-        //状態遷移
+//settingAction
+void settingAction();
+Timer timer4Setting;
+float buttonDisableTime = 300;//300msecはボタン無効時間
+void indicateSetTemperature();
+
+//action
+void systemAction(SystemStatus_t status);
+
+int main() {
+
+    while(1) {
+        //スイッチ状態監視と状態遷移
+        SystemStatus_t status = SYSTEM_OPERATING;
+        if(settingEntrySwitch == SETTING_SWITCH_SETTING){
+            status = SYSTEM_SETTING;
+        }else{
+            status = SYSTEM_OPERATING;
+        }
 
         //状態に応じたアクション
+        systemAction(status);
     }
 }
 double calculateThermistorResistance(double adcRatio)
@@ -52,4 +105,108 @@ double measureTemperature()
     double thermistorResistance = calculateThermistorResistance(thermistorPin.read());
 
     return thermoCalculator.CalculateTemperature(thermistorResistance);
+}
+void operatingAction()
+{
+    //UVスイッチ監視, 制御
+    if(uvControlSwitch == UV_SWITCH_ON){
+        uvControl = CONTROL_STATUS_ON;
+    }else{
+        uvControl = CONTROL_STATUS_OFF;
+    }
+
+    //温度を測定
+    double currentTemperature = measureTemperature();
+
+    //動作モード確定
+    static OperatingStatus_t operatingStatus = NATURAL_COOLING;
+    static char line2Buf[26];
+    if(currentTemperature > dangerZone){
+        operatingStatus = FAN_COOLING;
+        sprintf(line2Buf, "%s", "Fan Cooling");
+    }else if(targetTemperature + deadZone < currentTemperature <= dangerZone){
+        operatingStatus = NATURAL_COOLING;
+        sprintf(line2Buf, "%s", "Natural Cooling");
+    }else if(targetTemperature - deadZone < currentTemperature && currentTemperature <= targetTemperature + deadZone){
+        //deadZone内では, 前のセッティングを保持
+    }else if(currentTemperature <= targetTemperature - deadZone){
+        operatingStatus = HEATING;
+        sprintf(line2Buf, "%s", "HEATING");
+    }
+
+    //ファン, ヒータ制御
+    if(operatingStatus == FAN_COOLING){
+        heaterControl = CONTROL_STATUS_OFF;
+        fanControl = CONTROL_STATUS_ON;
+    }else if(operatingStatus == NATURAL_COOLING){
+        heaterControl = CONTROL_STATUS_OFF;
+        fanControl = CONTROL_STATUS_OFF;
+    }else{
+        heaterControl = CONTROL_STATUS_ON;
+        fanControl = CONTROL_STATUS_OFF;
+    }
+
+    //LCDに反映
+    LCD.ClearDisplay();
+    char line1Buf[16];
+    sprintf(line1Buf, "%2.1f%c%c", currentTemperature, (char)0xDF, 'C');
+    LCD.WriteString(line1Buf, 1);
+    LCD.WriteString(line2Buf, 2);
+}
+void settingAction()
+{
+    static bool buttonEnabled = true;
+
+    if(buttonEnabled){
+        if(settingUpSwitch == SETTING_SWITCH_PUSHED){
+            buttonEnabled = false;
+            timer4Setting.start();
+            if(targetTemperature < targetTemperatureUpperLimit){
+                targetTemperature++;
+            }
+        }else if(settingDownSwitch == SETTING_SWITCH_PUSHED){
+            buttonEnabled = false;
+            timer4Setting.start();
+            if(targetTemperature > targetTemperatureLowerLimit){
+                targetTemperature--;
+            }
+        }
+    }else{
+        if(timer4Setting.read_ms() > buttonDisableTime){
+            buttonEnabled = true;
+        }
+    }
+
+    indicateSetTemperature();
+}
+void systemAction(SystemStatus_t status)
+{
+    static bool isTimerStatrted = false;
+    if(status == SYSTEM_OPERATING){
+        if(!isTimerStatrted){
+            timer.start();
+            isTimerStatrted = true;
+        }
+
+        if(timer.read() > operatingPeriod){
+            operatingAction();
+            timer.reset();
+        }
+    }else{
+        timer.stop();
+        timer.reset();
+        isTimerStatrted = false;
+
+        settingAction();
+    }
+}
+void indicateSetTemperature()
+{
+    char buffer[16];
+
+    sprintf(buffer, "%2.1f%c%c", targetTemperature, (char)0xDF, 'C');
+
+    LCD.ClearDisplay();
+
+    LCD.WriteString(buffer, 1);
 }
