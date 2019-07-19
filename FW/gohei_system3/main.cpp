@@ -81,7 +81,14 @@ void indicateSetTemperature();
 //action
 void systemAction(SystemStatus_t status);
 
+
 int main() {
+    //initialize
+    settingEntrySwitch.mode(PullUp);
+    settingUpSwitch.mode(PullUp);
+    settingDownSwitch.mode(PullUp);
+    uvControlSwitch.mode(PullUp);
+
 
     while(1) {
         //スイッチ状態監視と状態遷移
