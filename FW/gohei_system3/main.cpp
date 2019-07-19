@@ -23,20 +23,20 @@ const int PIN_STATUS_LOW = 0;
 
 
 //LCD周り
-BusOut lcdDataBus(p21, p22, p23, p24, p25, p26, p27, p28);
-DigitalOut pin_RS(p29);
-DigitalOut pin_RW(p30);
-DigitalOut pin_E(p5);
+BusOut lcdDataBus(p5, p6, p7, p8, p9, p10, p11, p12);
+DigitalOut pin_RS(p13);
+DigitalOut pin_RW(p14);
+DigitalOut pin_E(p15);
 SC1602Driver LCD(lcdDataBus, pin_RS, pin_RW, pin_E);
 
 //ADC周り
 AnalogIn thermistorPin(p20);
 
 //スイッチ周り
-DigitalIn settingEntrySwitch(p6);
-DigitalIn settingUpSwitch(p7);
-DigitalIn settingDownSwitch(p8);
-DigitalIn uvControlSwitch(p9);
+DigitalIn settingEntrySwitch(p16);
+DigitalIn settingUpSwitch(p17);
+DigitalIn settingDownSwitch(p18);
+DigitalIn uvControlSwitch(p19);
 
 const int SETTING_SWITCH_SETTING = PIN_STATUS_HIGH;
 const int SETTING_SWITCH_OPERATING = PIN_STATUS_LOW;
