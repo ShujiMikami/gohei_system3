@@ -89,12 +89,25 @@ int main() {
     settingDownSwitch.mode(PullUp);
     uvControlSwitch.mode(PullUp);
 
+    /* 
+    while(1){
+        printf("themistor = %0.1f\r\n", measureTemperature());
+        wait(1);
+    }
+    */
+    LCD.Initialize();
+    char initialString[] = "System Start";
+    LCD.WriteString(initialString, 1);
+    wait(3);
 
     while(1) {
         //スイッチ状態監視と状態遷移
-        SystemStatus_t status = SYSTEM_OPERATING;
+        static SystemStatus_t status = SYSTEM_OPERATING;
         if(settingEntrySwitch == SETTING_SWITCH_SETTING){
-            status = SYSTEM_SETTING;
+            if(status != SYSTEM_SETTING){
+                status = SYSTEM_SETTING;
+                indicateSetTemperature();
+            }
         }else{
             status = SYSTEM_OPERATING;
         }
