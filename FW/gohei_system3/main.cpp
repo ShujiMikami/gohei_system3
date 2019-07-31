@@ -137,7 +137,7 @@ void operatingAction()
     if(currentTemperature > dangerZone){
         operatingStatus = FAN_COOLING;
         sprintf(line2Buf, "%s", "Fan Cooling");
-    }else if(targetTemperature + deadZone < currentTemperature <= dangerZone){
+    }else if(targetTemperature + deadZone < currentTemperature && currentTemperature <= dangerZone){
         operatingStatus = NATURAL_COOLING;
         sprintf(line2Buf, "%s", "Natural Cooling");
     }else if(targetTemperature - deadZone < currentTemperature && currentTemperature <= targetTemperature + deadZone){
