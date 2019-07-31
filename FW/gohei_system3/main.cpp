@@ -33,10 +33,10 @@ SC1602Driver LCD(lcdDataBus, pin_RS, pin_RW, pin_E);
 AnalogIn thermistorPin(p20);
 
 //スイッチ周り
-DigitalIn settingEntrySwitch(p16);
-DigitalIn settingUpSwitch(p17);
+DigitalIn settingEntrySwitch(p17);
+DigitalIn settingUpSwitch(p19);
 DigitalIn settingDownSwitch(p18);
-DigitalIn uvControlSwitch(p19);
+DigitalIn uvControlSwitch(p16);
 
 const int SETTING_SWITCH_SETTING = PIN_STATUS_HIGH;
 const int SETTING_SWITCH_OPERATING = PIN_STATUS_LOW;
@@ -47,9 +47,9 @@ const int UV_SWITCH_ON = PIN_STATUS_HIGH;
 const int UV_SWITCH_OFF = PIN_STATUS_LOW;
 
 //制御線周り
-DigitalOut heaterControl(p10);
-DigitalOut uvControl(p11);
-DigitalOut fanControl(p12);
+DigitalOut heaterControl(p22);
+DigitalOut uvControl(p23);
+DigitalOut fanControl(p21);
 
 const int CONTROL_STATUS_ON = 1;
 const int CONTROL_STATUS_OFF = 0;
