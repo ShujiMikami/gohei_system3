@@ -13,7 +13,21 @@
             "cppStandard": "c++11",
             "intelliSenseMode": "gcc-x64",
             "compileCommands": "compile_commands.json"
+        },
+        {
+            "name": "osx",
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "/Users/Shuji/Downloads/gcc-arm-none-eabi-8-2019-q3-update/bin/arm-none-eabi-gcc",
+            "cStandard": "c99",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "gcc-x64",
+            "compileCommands": "compile_commands.json"
         }
+
     ],
     "version": 4
 }

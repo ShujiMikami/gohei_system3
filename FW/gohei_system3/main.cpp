@@ -33,10 +33,10 @@ SC1602Driver LCD(lcdDataBus, pin_RS, pin_RW, pin_E);
 AnalogIn thermistorPin(p20);
 
 //スイッチ周り
-DigitalIn settingEntrySwitch(p16);
-DigitalIn settingUpSwitch(p17);
+DigitalIn settingEntrySwitch(p17);
+DigitalIn settingUpSwitch(p19);
 DigitalIn settingDownSwitch(p18);
-DigitalIn uvControlSwitch(p19);
+DigitalIn uvControlSwitch(p16);
 
 const int SETTING_SWITCH_SETTING = PIN_STATUS_HIGH;
 const int SETTING_SWITCH_OPERATING = PIN_STATUS_LOW;
@@ -47,9 +47,9 @@ const int UV_SWITCH_ON = PIN_STATUS_HIGH;
 const int UV_SWITCH_OFF = PIN_STATUS_LOW;
 
 //制御線周り
-DigitalOut heaterControl(p10);
-DigitalOut uvControl(p11);
-DigitalOut fanControl(p12);
+DigitalOut heaterControl(p22);
+DigitalOut uvControl(p23);
+DigitalOut fanControl(p21);
 
 const int CONTROL_STATUS_ON = 1;
 const int CONTROL_STATUS_OFF = 0;
@@ -89,12 +89,25 @@ int main() {
     settingDownSwitch.mode(PullUp);
     uvControlSwitch.mode(PullUp);
 
+    /* 
+    while(1){
+        printf("themistor = %0.1f\r\n", measureTemperature());
+        wait(1);
+    }
+    */
+    LCD.Initialize();
+    char initialString[] = "System Start";
+    LCD.WriteString(initialString, 1);
+    wait(3);
 
     while(1) {
         //スイッチ状態監視と状態遷移
-        SystemStatus_t status = SYSTEM_OPERATING;
+        static SystemStatus_t status = SYSTEM_OPERATING;
         if(settingEntrySwitch == SETTING_SWITCH_SETTING){
-            status = SYSTEM_SETTING;
+            if(status != SYSTEM_SETTING){
+                status = SYSTEM_SETTING;
+                indicateSetTemperature();
+            }
         }else{
             status = SYSTEM_OPERATING;
         }
@@ -115,13 +128,6 @@ double measureTemperature()
 }
 void operatingAction()
 {
-    //UVスイッチ監視, 制御
-    if(uvControlSwitch == UV_SWITCH_ON){
-        uvControl = CONTROL_STATUS_ON;
-    }else{
-        uvControl = CONTROL_STATUS_OFF;
-    }
-
     //温度を測定
     double currentTemperature = measureTemperature();
 
@@ -131,7 +137,7 @@ void operatingAction()
     if(currentTemperature > dangerZone){
         operatingStatus = FAN_COOLING;
         sprintf(line2Buf, "%s", "Fan Cooling");
-    }else if(targetTemperature + deadZone < currentTemperature <= dangerZone){
+    }else if(targetTemperature + deadZone < currentTemperature && currentTemperature <= dangerZone){
         operatingStatus = NATURAL_COOLING;
         sprintf(line2Buf, "%s", "Natural Cooling");
     }else if(targetTemperature - deadZone < currentTemperature && currentTemperature <= targetTemperature + deadZone){
@@ -171,23 +177,32 @@ void settingAction()
             if(targetTemperature < targetTemperatureUpperLimit){
                 targetTemperature++;
             }
+            indicateSetTemperature();
         }else if(settingDownSwitch == SETTING_SWITCH_PUSHED){
             buttonEnabled = false;
             timer4Setting.start();
             if(targetTemperature > targetTemperatureLowerLimit){
                 targetTemperature--;
             }
+            indicateSetTemperature();
         }
     }else{
         if(timer4Setting.read_ms() > buttonDisableTime){
             buttonEnabled = true;
+            timer4Setting.stop();
+            timer4Setting.reset();
         }
     }
-
-    indicateSetTemperature();
 }
 void systemAction(SystemStatus_t status)
 {
+    //UVスイッチ監視, 制御
+    if(uvControlSwitch == UV_SWITCH_ON){
+        uvControl = CONTROL_STATUS_ON;
+    }else{
+        uvControl = CONTROL_STATUS_OFF;
+    }
+
     static bool isTimerStatrted = false;
     if(status == SYSTEM_OPERATING){
         if(!isTimerStatrted){
