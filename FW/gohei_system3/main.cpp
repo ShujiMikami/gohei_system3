@@ -128,13 +128,6 @@ double measureTemperature()
 }
 void operatingAction()
 {
-    //UVスイッチ監視, 制御
-    if(uvControlSwitch == UV_SWITCH_ON){
-        uvControl = CONTROL_STATUS_ON;
-    }else{
-        uvControl = CONTROL_STATUS_OFF;
-    }
-
     //温度を測定
     double currentTemperature = measureTemperature();
 
@@ -184,23 +177,32 @@ void settingAction()
             if(targetTemperature < targetTemperatureUpperLimit){
                 targetTemperature++;
             }
+            indicateSetTemperature();
         }else if(settingDownSwitch == SETTING_SWITCH_PUSHED){
             buttonEnabled = false;
             timer4Setting.start();
             if(targetTemperature > targetTemperatureLowerLimit){
                 targetTemperature--;
             }
+            indicateSetTemperature();
         }
     }else{
         if(timer4Setting.read_ms() > buttonDisableTime){
             buttonEnabled = true;
+            timer4Setting.stop();
+            timer4Setting.reset();
         }
     }
-
-    indicateSetTemperature();
 }
 void systemAction(SystemStatus_t status)
 {
+    //UVスイッチ監視, 制御
+    if(uvControlSwitch == UV_SWITCH_ON){
+        uvControl = CONTROL_STATUS_ON;
+    }else{
+        uvControl = CONTROL_STATUS_OFF;
+    }
+
     static bool isTimerStatrted = false;
     if(status == SYSTEM_OPERATING){
         if(!isTimerStatrted){
