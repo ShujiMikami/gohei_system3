@@ -16,6 +16,8 @@ const int BOOT_TIME = 40; //起動後40msec待つらしい
 const int DESCRIPTION_TIME_FUNCTION_SET = 1; //仕様は37us
 const int DESCRIPTION_TIME_DISPLAY_ONOFF = 1; //仕様は37us
 const int DESCRIPTION_TIME_ENTRYMODE_SET = 1; //仕様は37us
+const int DESCRIPTION_TIME_SET_DDRAM_ADDRESS = 1;//仕様は37us
+const int DESCRIPTION_TIME_WRITE_DATA_TO_RAM = 1;//仕様は37us
 
 //コマンドフラグ
 const int SET_DDRAM_COMMAND = 0x80;
@@ -149,11 +151,14 @@ void SC1602Driver::writeCharToPos(uint8_t pos, char data)
     setDDRAMaddress(pos);
 
     writeData((uint8_t)data);
+
+    wait_ms(DESCRIPTION_TIME_WRITE_DATA_TO_RAM);
 }
 void SC1602Driver::setDDRAMaddress(uint8_t address)
 {
     if(isAddressInRange(address)){
         writeCommand(SET_DDRAM_COMMAND | address);
+        wait_ms(DESCRIPTION_TIME_SET_DDRAM_ADDRESS);
     }
 }
 inline bool isAddressInRange(uint8_t address)
