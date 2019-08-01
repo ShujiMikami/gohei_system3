@@ -17,9 +17,9 @@ typedef enum{
     HEATING
 }OperatingStatus_t;
 
+//GPIOのHL名前つけ
 const int PIN_STATUS_HIGH = 1;
 const int PIN_STATUS_LOW = 0;
-
 
 //LCD周り
 BusOut lcdDataBus(p5, p6, p7, p8, p9, p10, p11, p12);
@@ -42,14 +42,18 @@ DigitalOut heaterControl(p22);
 DigitalOut uvControl(p23);
 DigitalOut fanControl(p21);
 
+//SettingSwitchの切り替え先定義
 const int SETTING_SWITCH_SETTING = PIN_STATUS_HIGH;
 const int SETTING_SWITCH_OPERATING = PIN_STATUS_LOW;
 
+//Settingのタクトボタンの負論理定義
 const int SETTING_SWITCH_PUSHED = PIN_STATUS_LOW;
 
+//UVスイッチの正論理定義
 const int UV_SWITCH_ON = PIN_STATUS_HIGH;
 const int UV_SWITCH_OFF = PIN_STATUS_LOW;
 
+//制御のONOFF正論理定義
 const int CONTROL_STATUS_ON = 1;
 const int CONTROL_STATUS_OFF = 0;
 
