@@ -81,6 +81,8 @@ void indicateSetTemperature();
 //action
 void systemAction(SystemStatus_t status);
 
+//Current Status Indicate
+void indicateCurrentStatus(double currentTemperature, char* controlStatus);
 
 int main() {
     //initialize
@@ -160,11 +162,7 @@ void operatingAction()
     }
 
     //LCDに反映
-    LCD.ClearDisplay();
-    char line1Buf[16];
-    sprintf(line1Buf, "%2.1f%c%c", currentTemperature, (char)0xDF, 'C');
-    LCD.WriteString(line1Buf, 1);
-    LCD.WriteString(line2Buf, 2);
+    indicateCurrentStatus(currentTemperature, line2Buf);
 }
 void settingAction()
 {
@@ -231,4 +229,14 @@ void indicateSetTemperature()
     LCD.ClearDisplay();
 
     LCD.WriteString(buffer, 1);
+}
+void indicateCurrentStatus(double currentTemperature, char* controlStatus)
+{
+    LCD.ClearDisplay();
+    char line1Buf[16];
+    sprintf(line1Buf, "%2.1f%c%c", currentTemperature, (char)0xDF, 'C');
+
+    LCD.WriteString(line1Buf, 1);
+    LCD.WriteString(controlStatus, 2);
+
 }
