@@ -85,22 +85,17 @@ void systemAction(SystemStatus_t status);
 void indicateCurrentStatus(double currentTemperature, char* controlStatus);
 
 int main() {
-    //initialize
-    settingEntrySwitch.mode(PullUp);
-    settingUpSwitch.mode(PullUp);
-    settingDownSwitch.mode(PullUp);
-    uvControlSwitch.mode(PullUp);
-
-    /* 
-    while(1){
-        printf("themistor = %0.1f\r\n", measureTemperature());
-        wait(1);
-    }
-    */
+    //起動メッセージ表示
     LCD.Initialize();
     char initialString[] = "System Start";
     LCD.WriteString(initialString, 1);
     wait(3);
+
+    //入力ピンinitialize
+    settingEntrySwitch.mode(PullUp);
+    settingUpSwitch.mode(PullUp);
+    settingDownSwitch.mode(PullUp);
+    uvControlSwitch.mode(PullUp);
 
     while(1) {
         //スイッチ状態監視と状態遷移
@@ -238,5 +233,4 @@ void indicateCurrentStatus(double currentTemperature, char* controlStatus)
 
     LCD.WriteString(line1Buf, 1);
     LCD.WriteString(controlStatus, 2);
-
 }
