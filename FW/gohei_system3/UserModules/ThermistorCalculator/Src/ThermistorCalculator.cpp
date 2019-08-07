@@ -21,5 +21,5 @@ ThermistorCalculator::ThermistorCalculator(const double B, const double Rroom)
 
 double ThermistorCalculator::CalculateTemperature(double thermistorRegistance)
 {
-    return 1.0 / (1.0 / (ROOM_TEMPERATURE + ZERO_KELVIN) + 1.0 / b_constant * (log(thermistorRegistance) - log(r_room)));
+    return 1.0 / (1.0 / (ROOM_TEMPERATURE - ZERO_KELVIN) + 1.0 / b_constant * (log(thermistorRegistance) - log(r_room))) + ZERO_KELVIN;
 }

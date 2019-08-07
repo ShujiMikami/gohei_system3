@@ -255,8 +255,11 @@ CXX_FLAGS += -funsigned-char
 CXX_FLAGS += -MMD
 CXX_FLAGS += -fno-delete-null-pointer-checks
 CXX_FLAGS += -fomit-frame-pointer
-CXX_FLAGS += -Os
-CXX_FLAGS += -g1
+CXX_FLAGS += -O0
+#CXX_FLAGS += -g3
+CXX_FLAGS += -gdwarf-2
+#CXX_FLAGS += -g1
+#CXX_FLAGS += -ggdb
 CXX_FLAGS += -DMBED_TRAP_ERRORS_ENABLED=1
 CXX_FLAGS += -mcpu=cortex-m3
 CXX_FLAGS += -mthumb
