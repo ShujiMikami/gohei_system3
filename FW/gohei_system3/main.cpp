@@ -6,21 +6,20 @@
 
 //システムステータス
 typedef enum{
-    SYSTEM_SETTING,
+    SYSTEM_SETTING = 0,
     SYSTEM_OPERATING
 }SystemStatus_t;
 
 //オペレーティングステータス
 typedef enum{
-    FAN_COOLING,
+    FAN_COOLING = 0,
     NATURAL_COOLING,
     HEATING
 }OperatingStatus_t;
 
-
+//GPIOのHL名前つけ
 const int PIN_STATUS_HIGH = 1;
 const int PIN_STATUS_LOW = 0;
-
 
 //LCD周り
 BusOut lcdDataBus(p5, p6, p7, p8, p9, p10, p11, p12);
@@ -38,19 +37,23 @@ DigitalIn settingUpSwitch(p19);
 DigitalIn settingDownSwitch(p18);
 DigitalIn uvControlSwitch(p16);
 
-const int SETTING_SWITCH_SETTING = PIN_STATUS_HIGH;
-const int SETTING_SWITCH_OPERATING = PIN_STATUS_LOW;
-
-const int SETTING_SWITCH_PUSHED = PIN_STATUS_LOW;
-
-const int UV_SWITCH_ON = PIN_STATUS_HIGH;
-const int UV_SWITCH_OFF = PIN_STATUS_LOW;
-
 //制御線周り
 DigitalOut heaterControl(p22);
 DigitalOut uvControl(p23);
 DigitalOut fanControl(p21);
 
+//SettingSwitchの切り替え先定義
+const int SETTING_SWITCH_SETTING = PIN_STATUS_HIGH;
+const int SETTING_SWITCH_OPERATING = PIN_STATUS_LOW;
+
+//Settingのタクトボタンの負論理定義
+const int SETTING_SWITCH_PUSHED = PIN_STATUS_LOW;
+
+//UVスイッチの正論理定義
+const int UV_SWITCH_ON = PIN_STATUS_HIGH;
+const int UV_SWITCH_OFF = PIN_STATUS_LOW;
+
+//制御のONOFF正論理定義
 const int CONTROL_STATUS_ON = 1;
 const int CONTROL_STATUS_OFF = 0;
 
@@ -81,36 +84,31 @@ void indicateSetTemperature();
 //action
 void systemAction(SystemStatus_t status);
 
+//Current Status Indicate
+void indicateCurrentStatus(double currentTemperature, char* controlStatus);
+
+//起動メッセージ系
+char initialString[] = "System Start";
+void indicateInitialMessage();
+
+//状態判定系
+SystemStatus_t getRequiredSystemStatus();
+
+//ピンセッティング初期化
+void initializePinSetting();
 
 int main() {
-    //initialize
-    settingEntrySwitch.mode(PullUp);
-    settingUpSwitch.mode(PullUp);
-    settingDownSwitch.mode(PullUp);
-    uvControlSwitch.mode(PullUp);
+    //起動メッセージ表示
+    indicateInitialMessage();
 
-    /* 
-    while(1){
-        printf("themistor = %0.1f\r\n", measureTemperature());
-        wait(1);
-    }
-    */
-    LCD.Initialize();
-    char initialString[] = "System Start";
-    LCD.WriteString(initialString, 1);
-    wait(3);
+    //入力ピンinitialize
+    initializePinSetting();
+
+    SystemStatus_t status = SYSTEM_OPERATING;
 
     while(1) {
         //スイッチ状態監視と状態遷移
-        static SystemStatus_t status = SYSTEM_OPERATING;
-        if(settingEntrySwitch == SETTING_SWITCH_SETTING){
-            if(status != SYSTEM_SETTING){
-                status = SYSTEM_SETTING;
-                indicateSetTemperature();
-            }
-        }else{
-            status = SYSTEM_OPERATING;
-        }
+        status = getRequiredSystemStatus();
 
         //状態に応じたアクション
         systemAction(status);
@@ -160,14 +158,17 @@ void operatingAction()
     }
 
     //LCDに反映
-    LCD.ClearDisplay();
-    char line1Buf[16];
-    sprintf(line1Buf, "%2.1f%c%c", currentTemperature, (char)0xDF, 'C');
-    LCD.WriteString(line1Buf, 1);
-    LCD.WriteString(line2Buf, 2);
+    indicateCurrentStatus(currentTemperature, line2Buf);
 }
 void settingAction()
 {
+    //セッティングモードに入った初回の表示
+    static bool isFirstCall = true;
+    if(isFirstCall){
+        indicateSetTemperature();
+        isFirstCall = false;
+    }
+
     static bool buttonEnabled = true;
 
     if(buttonEnabled){
@@ -231,4 +232,37 @@ void indicateSetTemperature()
     LCD.ClearDisplay();
 
     LCD.WriteString(buffer, 1);
+}
+void indicateCurrentStatus(double currentTemperature, char* controlStatus)
+{
+    LCD.ClearDisplay();
+    char line1Buf[16];
+    sprintf(line1Buf, "%2.1f%c%c", currentTemperature, (char)0xDF, 'C');
+
+    LCD.WriteString(line1Buf, 1);
+    LCD.WriteString(controlStatus, 2);
+}
+void indicateInitialMessage()
+{
+    LCD.Initialize();
+    LCD.WriteString(initialString, 1);
+    wait(3);
+}
+void initializePinSetting()
+{
+    settingEntrySwitch.mode(PullUp);
+    settingUpSwitch.mode(PullUp);
+    settingDownSwitch.mode(PullUp);
+    uvControlSwitch.mode(PullUp);
+}
+SystemStatus_t getRequiredSystemStatus()
+{
+    SystemStatus_t result = SYSTEM_OPERATING;
+    if(settingEntrySwitch == SETTING_SWITCH_SETTING){
+        result = SYSTEM_SETTING;
+    }else{
+        result = SYSTEM_OPERATING;
+    }
+
+    return result;
 }
