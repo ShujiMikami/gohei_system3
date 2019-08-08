@@ -170,12 +170,6 @@ void operatingAction()
 }
 void settingAction()
 {
-    //セッティングモードに入った初回の表示
-    static bool isFirstCall = true;
-    if(isFirstCall){
-        indicateSetTemperature();
-        isFirstCall = false;
-    }
 
     static bool buttonEnabled = true;
 
@@ -213,7 +207,12 @@ void systemAction(SystemStatus_t status)
     }
 
     static bool isTimerStatrted = false;
+
+    static bool outOfSettingModeFlag = true;
+
     if(status == SYSTEM_OPERATING){
+        outOfSettingModeFlag = true;
+
         if(!isTimerStatrted){
             timer.start();
             isTimerStatrted = true;
@@ -227,6 +226,12 @@ void systemAction(SystemStatus_t status)
         timer.stop();
         timer.reset();
         isTimerStatrted = false;
+
+        //セッティングモードに入った初回の表示
+        if(outOfSettingModeFlag){
+            indicateSetTemperature();
+            outOfSettingModeFlag = false;
+        }
 
         settingAction();
     }
