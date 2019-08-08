@@ -131,18 +131,26 @@ void operatingAction()
 
     //動作モード確定
     static OperatingStatus_t operatingStatus = NATURAL_COOLING;
-    static char line2Buf[26];
     if(currentTemperature > dangerZone){
         operatingStatus = FAN_COOLING;
-        sprintf(line2Buf, "%s", "Fan Cooling");
     }else if(targetTemperature + deadZone < currentTemperature && currentTemperature <= dangerZone){
         operatingStatus = NATURAL_COOLING;
-        sprintf(line2Buf, "%s", "Natural Cooling");
     }else if(targetTemperature - deadZone < currentTemperature && currentTemperature <= targetTemperature + deadZone){
         //deadZone内では, 前のセッティングを保持
     }else if(currentTemperature <= targetTemperature - deadZone){
         operatingStatus = HEATING;
+    }
+
+    //表示する状態文字を指定
+    char line2Buf[26];
+    if(operatingStatus == FAN_COOLING){
+        sprintf(line2Buf, "%s", "Fan Cooling");
+    }else if(operatingStatus == NATURAL_COOLING){
+        sprintf(line2Buf, "%s", "Natural Cooling");
+    }else if(operatingStatus == HEATING){
         sprintf(line2Buf, "%s", "HEATING");
+    }else{
+        sprintf(line2Buf, "%s", "NOT DEFINED");
     }
 
     //ファン, ヒータ制御
@@ -162,12 +170,6 @@ void operatingAction()
 }
 void settingAction()
 {
-    //セッティングモードに入った初回の表示
-    static bool isFirstCall = true;
-    if(isFirstCall){
-        indicateSetTemperature();
-        isFirstCall = false;
-    }
 
     static bool buttonEnabled = true;
 
@@ -205,7 +207,12 @@ void systemAction(SystemStatus_t status)
     }
 
     static bool isTimerStatrted = false;
+
+    static bool outOfSettingModeFlag = true;
+
     if(status == SYSTEM_OPERATING){
+        outOfSettingModeFlag = true;
+
         if(!isTimerStatrted){
             timer.start();
             isTimerStatrted = true;
@@ -219,6 +226,12 @@ void systemAction(SystemStatus_t status)
         timer.stop();
         timer.reset();
         isTimerStatrted = false;
+
+        //セッティングモードに入った初回の表示
+        if(outOfSettingModeFlag){
+            indicateSetTemperature();
+            outOfSettingModeFlag = false;
+        }
 
         settingAction();
     }
