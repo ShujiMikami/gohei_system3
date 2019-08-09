@@ -5,7 +5,7 @@
 #include "stdio.h"
 
 //バージョン番号
-const char versionNumber[] = "0.0.1";
+const char versionNumber[] = "Ver 0.0.1";
 
 //システムステータス
 typedef enum{
