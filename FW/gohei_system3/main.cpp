@@ -4,6 +4,9 @@
 #include "stdlib.h"
 #include "stdio.h"
 
+//バージョン番号
+const char versionNumber[] = "0.0.1";
+
 //システムステータス
 typedef enum{
     SYSTEM_SETTING = 0,
@@ -259,6 +262,7 @@ void indicateInitialMessage()
 {
     LCD.Initialize();
     LCD.WriteString(initialString, 1);
+    LCD.WriteString((char*)versionNumber, 2);
     wait(3);
 }
 void initializePinSetting()
