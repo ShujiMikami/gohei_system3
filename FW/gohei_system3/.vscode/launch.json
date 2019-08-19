@@ -48,7 +48,7 @@
                 "preLaunchTask": "make.exe",
                 "MIMode": "gdb",
                 "MIDebuggerPath": "arm-none-eabi-gdb.exe",
-                "debugServerPath": "pyocd",
+                "debugServerPath": "${env:PYTHON37_DIR}/Scripts/pyocd",
                 "debugServerArgs": "gdbserver",
                 "setupCommands": [
                     { "text": "-environment-cd ${workspaceRoot}\\BUILD" },

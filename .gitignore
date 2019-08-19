@@ -7,3 +7,4 @@ FW/gohei_system3/.vscode/.cortex-debug.registers.state.json
 LCDTest/build/
 LCDTest/Debug/
 *.un~
+*.json~
