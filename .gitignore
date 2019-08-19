@@ -8,3 +8,6 @@ LCDTest/build/
 LCDTest/Debug/
 *.un~
 *.json~
+HTTPServer_echoback/Makefile~
+HTTPServer_echoback/GettingStarted.html
+HTTPServer_echoback/BUILD/
