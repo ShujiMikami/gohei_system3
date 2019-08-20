@@ -355,7 +355,7 @@ CXX_FLAGS += -funsigned-char
 CXX_FLAGS += -MMD
 CXX_FLAGS += -fno-delete-null-pointer-checks
 CXX_FLAGS += -fomit-frame-pointer
-CXX_FLAGS += -Os
+CXX_FLAGS += -Og
 CXX_FLAGS += -g1
 CXX_FLAGS += -DMBED_TRAP_ERRORS_ENABLED=1
 CXX_FLAGS += -mcpu=cortex-m3
@@ -366,6 +366,7 @@ CXX_FLAGS += -DMBED_RAM_START=0x10000000
 CXX_FLAGS += -DMBED_RAM_SIZE=0x8000
 CXX_FLAGS += -DMBED_RAM1_START=0x2007c000
 CXX_FLAGS += -DMBED_RAM1_SIZE=0x8000
+CXX_FLAGS += -gdwarf-2
 
 ASM_FLAGS += -x
 ASM_FLAGS += assembler-with-cpp
