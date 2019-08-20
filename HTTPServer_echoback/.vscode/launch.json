@@ -40,8 +40,9 @@
             },
             "osx": {
                 "MIMode": "gdb",
-                "MIDebuggerPath": "/usr/local/bin/arm-none-eabi-gdb",
-                "debugServerPath": "pyocd-gdbserver"
+                "MIDebuggerPath": "arm-none-eabi-gdb",
+                "debugServerPath": "pyocd",
+                "debugServerArgs": "gdbserver"
             },
             "windows": {
                 "preLaunchTask": "make.exe",
