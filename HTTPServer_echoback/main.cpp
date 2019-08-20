@@ -33,7 +33,7 @@ int main (void)
 
     //setup ethernet interface
     eth.init(); //Use DHCP
-    int connectionResult = eth.connect();
+    volatile int connectionResult = eth.connect();
     
     printf("connection result = %d", connectionResult);
 
