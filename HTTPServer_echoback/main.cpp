@@ -16,33 +16,57 @@ bool clientIsConnected = false;
 DigitalOut led1(LED1); //server listning status
 DigitalOut led2(LED2); //socket connecting status
 
-Ticker ledTick;
+DigitalIn linkSignal(P1_25);
+DigitalIn speedSignal(P1_26);
+DigitalOut linkLamp(p30);
+DigitalOut speedLamp(p29);
 
-void ledTickfunc()
+//なぜかTickを宣言しないとEthernetがこける
+Ticker dummyTick;
+
+
+void etherStatusLampThreadFunc();
+
+void etherStatusLampThreadFunc()
 {
-    if(serverIsListened)  {
-        led1 = !led1;
-    } else {
-        led1 = false;
+    while(true){
+        linkLamp = !linkSignal;
+        speedLamp = !speedSignal;
+        wait(0.05);
     }
 }
 
-int main (void)
+void serverThreadFunc();
+void serverThreadFunc()
 {
-    ledTick.attach(&ledTickfunc,0.5);
-
     //setup ethernet interface
     eth.init(); //Use DHCP
-    int connectionResult = eth.connect();
     
-    printf("connection result = %d", connectionResult);
+    //Print MAC Address
+    printf("MAC Address = %s\r\n", eth.getMACAddress());
+
+    //Connect to DHCP server
+    bool connectedToDHCPServer = false;
+    while(!connectedToDHCPServer){
+        printf("Trying to connect DHCPServer...\r\n");
+
+        int connectionResult = eth.connect();
+
+        if(connectionResult == 0){
+            printf("connection success\r\n");
+            connectedToDHCPServer = true;
+        } else {
+            printf("connection fail\r\n");
+        }
+    }
+
 
     printf("IP Address is %s\n\r", eth.getIPAddress());
 
     //setup tcp socket
     if(svr.bind(PORT)< 0) {
         printf("tcp server bind failed.\n\r");
-        return -1;
+        return;
     } else {
         printf("tcp server bind successed.\n\r");
         serverIsListened = true;
@@ -50,7 +74,7 @@ int main (void)
 
     if(svr.listen(1) < 0) {
         printf("tcp server listen failed.\n\r");
-        return -1;
+        return;
     } else {
         printf("tcp server is listening...\n\r");
     }
@@ -96,4 +120,23 @@ int main (void)
             led2 = false;
         }
     }
+}
+
+
+int main (void)
+{
+    Thread threadEtherLamp;
+    threadEtherLamp.start(etherStatusLampThreadFunc);
+    
+    Thread threadServer;
+    threadServer.start(serverThreadFunc);
+
+    while(1){
+        led1 = !led1;
+
+        wait(0.5);
+
+    }
+
+    return 0;
 }

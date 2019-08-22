@@ -23,7 +23,7 @@ MAKETARGET = '$(MAKE)' --no-print-directory -C $(OBJDIR) -f '$(mkfile_path)' \
 .PHONY: $(OBJDIR) clean
 all:
 	+@$(call MAKEDIR,$(OBJDIR))
-	+@$(MAKETARGET)
+	+$(MAKETARGET)
 $(OBJDIR): all
 Makefile : ;
 % :: $(OBJDIR) ; :
@@ -355,8 +355,8 @@ CXX_FLAGS += -funsigned-char
 CXX_FLAGS += -MMD
 CXX_FLAGS += -fno-delete-null-pointer-checks
 CXX_FLAGS += -fomit-frame-pointer
-CXX_FLAGS += -Os
-CXX_FLAGS += -g1
+CXX_FLAGS += -Og
+CXX_FLAGS += -g
 CXX_FLAGS += -DMBED_TRAP_ERRORS_ENABLED=1
 CXX_FLAGS += -mcpu=cortex-m3
 CXX_FLAGS += -mthumb
@@ -366,6 +366,7 @@ CXX_FLAGS += -DMBED_RAM_START=0x10000000
 CXX_FLAGS += -DMBED_RAM_SIZE=0x8000
 CXX_FLAGS += -DMBED_RAM1_START=0x2007c000
 CXX_FLAGS += -DMBED_RAM1_SIZE=0x8000
+CXX_FLAGS += -gdwarf-2
 
 ASM_FLAGS += -x
 ASM_FLAGS += assembler-with-cpp
@@ -446,18 +447,18 @@ all: $(PROJECT).bin $(PROJECT).hex size
 	+@$(call MAKEDIR,$(dir $@))
 	+@echo "Assemble: $(notdir $<)"
   
-	@$(AS) -c $(ASM_FLAGS) -o $@ $<
+	$(AS) -c $(ASM_FLAGS) -o $@ $<
   
 
 .c.o:
 	+@$(call MAKEDIR,$(dir $@))
 	+@echo "Compile: $(notdir $<)"
-	@$(CC) $(C_FLAGS) $(INCLUDE_PATHS) -o $@ $<
+	$(CC) $(C_FLAGS) $(INCLUDE_PATHS) -o $@ $<
 
 .cpp.o:
 	+@$(call MAKEDIR,$(dir $@))
 	+@echo "Compile: $(notdir $<)"
-	@$(CPP) $(CXX_FLAGS) $(INCLUDE_PATHS) -o $@ $<
+	$(CPP) $(CXX_FLAGS) $(INCLUDE_PATHS) -o $@ $<
 
 
 $(PROJECT).link_script.ld: $(LINKER_SCRIPT)
