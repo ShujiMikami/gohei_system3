@@ -24,9 +24,26 @@ DigitalOut speedLamp(p29);
 //なぜかTickを宣言しないとEthernetがこける
 Ticker dummyTick;
 
-
 void etherStatusLampThreadFunc();
+void serverThreadFunc();
 
+int main (void)
+{
+    Thread threadEtherLamp;
+    threadEtherLamp.start(etherStatusLampThreadFunc);
+    
+    Thread threadServer;
+    threadServer.start(serverThreadFunc);
+
+    while(1){
+        led1 = !led1;
+
+        wait(0.5);
+
+    }
+
+    return 0;
+}
 void etherStatusLampThreadFunc()
 {
     while(true){
@@ -36,7 +53,6 @@ void etherStatusLampThreadFunc()
     }
 }
 
-void serverThreadFunc();
 void serverThreadFunc()
 {
     //setup ethernet interface
@@ -120,23 +136,4 @@ void serverThreadFunc()
             led2 = false;
         }
     }
-}
-
-
-int main (void)
-{
-    Thread threadEtherLamp;
-    threadEtherLamp.start(etherStatusLampThreadFunc);
-    
-    Thread threadServer;
-    threadServer.start(serverThreadFunc);
-
-    while(1){
-        led1 = !led1;
-
-        wait(0.5);
-
-    }
-
-    return 0;
 }

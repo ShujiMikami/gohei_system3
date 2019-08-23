@@ -134,6 +134,7 @@ OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_System.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Task.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Time.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Timer.o
+OBJECTS += HTTPAnalyze.o
 
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/CRP.o
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/analogin_api.o
@@ -271,8 +272,8 @@ C_FLAGS += -funsigned-char
 C_FLAGS += -MMD
 C_FLAGS += -fno-delete-null-pointer-checks
 C_FLAGS += -fomit-frame-pointer
-C_FLAGS += -Os
-C_FLAGS += -g1
+C_FLAGS += -Og
+C_FLAGS += -g
 C_FLAGS += -DMBED_TRAP_ERRORS_ENABLED=1
 C_FLAGS += -mcpu=cortex-m3
 C_FLAGS += -mthumb
@@ -415,8 +416,8 @@ ASM_FLAGS += -funsigned-char
 ASM_FLAGS += -MMD
 ASM_FLAGS += -fno-delete-null-pointer-checks
 ASM_FLAGS += -fomit-frame-pointer
-ASM_FLAGS += -Os
-ASM_FLAGS += -g1
+ASM_FLAGS += -Og
+ASM_FLAGS += -g
 ASM_FLAGS += -DMBED_TRAP_ERRORS_ENABLED=1
 ASM_FLAGS += -mcpu=cortex-m3
 ASM_FLAGS += -mthumb
