@@ -135,6 +135,7 @@ OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Task.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Time.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Timer.o
 OBJECTS += HTTPAnalyze.o
+OBJECTS += ServerAction.o
 
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/CRP.o
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/analogin_api.o
