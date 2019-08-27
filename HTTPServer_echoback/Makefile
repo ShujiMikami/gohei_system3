@@ -136,6 +136,11 @@ OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Time.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Timer.o
 OBJECTS += UserModules/HTTPAnalyze/Src/HTTPAnalyze.o
 OBJECTS += UserModules/ServerAction/Src/ServerAction.o
+OBJECTS += UserModules/BoardControler/Src/BoardControler.o
+OBJECTS += UserModules/LCDDriver/Src/LCDDriver.o
+OBJECTS += UserModules/ThermistorCalculator/Src/ThermistorCalculator.o
+OBJECTS += UserModules/CageDriver/Src/CageDriver.o
+
 
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/CRP.o
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/analogin_api.o
@@ -190,6 +195,12 @@ INCLUDE_PATHS += -I../mbed/hal
 INCLUDE_PATHS += -I../mbed/platform
 INCLUDE_PATHS += -I../UserModules/HTTPAnalyze/Inc
 INCLUDE_PATHS += -I../UserModules/ServerAction/Inc
+INCLUDE_PATHS += -I../UserModules/BoardControler/Inc
+INCLUDE_PATHS += -I../UserModules/LCDDriver/Inc
+INCLUDE_PATHS += -I../UserModules/ThermistorCalculator/Inc
+INCLUDE_PATHS += -I../UserModules/CageDriver/Inc
+
+
 
 
 LIBRARY_PATHS := -L../mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM 
