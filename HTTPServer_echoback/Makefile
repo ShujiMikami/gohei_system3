@@ -134,8 +134,8 @@ OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_System.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Task.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Time.o
 OBJECTS += mbed-rtos/rtx/TARGET_CORTEX_M/rt_Timer.o
-OBJECTS += HTTPAnalyze.o
-OBJECTS += ServerAction.o
+OBJECTS += UserModules/HTTPAnalyze/Src/HTTPAnalyze.o
+OBJECTS += UserModules/ServerAction/Src/ServerAction.o
 
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/CRP.o
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/analogin_api.o
@@ -188,6 +188,9 @@ INCLUDE_PATHS += -I../mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM
 INCLUDE_PATHS += -I../mbed/drivers
 INCLUDE_PATHS += -I../mbed/hal
 INCLUDE_PATHS += -I../mbed/platform
+INCLUDE_PATHS += -I../UserModules/HTTPAnalyze/Inc
+INCLUDE_PATHS += -I../UserModules/ServerAction/Inc
+
 
 LIBRARY_PATHS := -L../mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM 
 LIBRARIES := -lmbed 
