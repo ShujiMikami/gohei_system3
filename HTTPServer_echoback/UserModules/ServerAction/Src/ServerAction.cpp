@@ -129,8 +129,13 @@ void requestAction(char* requestMessage)
     char requestLine[50];
 
     request.GetRequestLine(requestLine, sizeof(requestLine));
-
     printf("request line = %s\r\n", requestLine);
-    
-    
+
+
+    request.GetURI(requestLine, sizeof(requestLine));
+    printf("uri is = %s\r\n", requestLine);
+
+
+    request.GetProtocolVersion(requestLine, sizeof(requestLine));
+    printf("protocol is %s \r\n", requestLine);
 }

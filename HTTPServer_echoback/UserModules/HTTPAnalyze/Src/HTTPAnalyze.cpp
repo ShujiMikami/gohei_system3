@@ -48,10 +48,26 @@ void HTTPRequest_t::GetURI(char* buffer, unsigned short bufferSize)
 
     strtok(strToRead, " ");
 
+    char* uri = strtok(NULL, " ");
 
+    if(strlen(uri) < bufferSize){
+        strcpy(buffer, uri);
+    }
 }
 void HTTPRequest_t::GetProtocolVersion(char* buffer, unsigned short bufferSize)
 {
+    char strToRead[64];
+
+    GetRequestLine(strToRead, sizeof(strToRead));
+
+    strtok(strToRead, " ");
+    strtok(NULL, " ");
+
+    char* protocol = strtok(NULL, " ");
+
+    if(strlen(buffer) < bufferSize){
+        strcpy(buffer, protocol);
+    }
 
 }
 void HTTPRequest_t::GetHeader(char* buffer, unsigned short bufferSize)
