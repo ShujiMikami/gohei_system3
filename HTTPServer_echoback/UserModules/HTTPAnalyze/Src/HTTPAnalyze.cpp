@@ -1,19 +1,23 @@
 #include "HTTPAnalyze.h"
 #include <string.h>
 
-HTTPRequest_t::HTTPRequest_t(char* data)
+#include <mbed.h>
+
+HTTPRequest_t::HTTPRequest_t(char* binaryData)
 {
-    int length = strlen(data);
+    int length = strlen(binaryData);
 
-    if((length + 1) > HTTP_REQUEST_BUFFER_SIZE){
-        length = HTTP_REQUEST_BUFFER_SIZE - 1;
-    }
+    messageBuffer = new char[length + 1];
 
-    strncpy(messageBuffer, data, length);
+    strncpy(messageBuffer, binaryData, length);
 
     messageBuffer[length] = '\0';
 
     splitBuffer();
+}
+HTTPRequest_t::~HTTPRequest_t()
+{
+    delete[] messageBuffer;
 }
 void HTTPRequest_t::GetRequestLine(char* buffer, unsigned short bufferSize)
 {

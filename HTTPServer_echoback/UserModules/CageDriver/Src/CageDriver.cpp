@@ -86,7 +86,7 @@ float buttonDisableTime = 300;//300msecはボタン無効時間
 void indicateSetTemperature();
 
 //action
-void systemAction(SystemStatus_t status);
+void systemAction(SystemStatus_t systemStatus);
 
 //Current Status Indicate
 void indicateCurrentStatus(double currentTemperature, char* controlStatus);
@@ -101,6 +101,10 @@ SystemStatus_t getRequiredSystemStatus();
 //ピンセッティング初期化
 void initializePinSetting();
 
+//外部から覗ける変数
+static double currentTemperature = 0;
+static char operatingStatusMessage[26];
+
 void CageDriveThread() {
     //起動メッセージ表示
     printf("[CageDrive Thread]Initial Message\r\n");
@@ -109,14 +113,14 @@ void CageDriveThread() {
     //入力ピンinitialize
     initializePinSetting();
 
-    SystemStatus_t status = SYSTEM_OPERATING;
+    SystemStatus_t operatingStatus = SYSTEM_OPERATING;
 
     while(1) {
         //スイッチ状態監視と状態遷移
-        status = getRequiredSystemStatus();
+        operatingStatus = getRequiredSystemStatus();
 
         //状態に応じたアクション
-        systemAction(status);
+        systemAction(operatingStatus);
     }
 }
 double calculateThermistorResistance(double adcRatio)
@@ -132,7 +136,7 @@ double measureTemperature()
 void operatingAction()
 {
     //温度を測定
-    double currentTemperature = measureTemperature();
+    currentTemperature = measureTemperature();
 
     //動作モード確定
     static OperatingStatus_t operatingStatus = NATURAL_COOLING;
@@ -147,15 +151,14 @@ void operatingAction()
     }
 
     //表示する状態文字を指定
-    char line2Buf[26];
     if(operatingStatus == FAN_COOLING){
-        sprintf(line2Buf, "%s", "Fan Cooling");
+        sprintf(operatingStatusMessage, "%s", "Fan Cooling");
     }else if(operatingStatus == NATURAL_COOLING){
-        sprintf(line2Buf, "%s", "Natural Cooling");
+        sprintf(operatingStatusMessage, "%s", "Natural Cooling");
     }else if(operatingStatus == HEATING){
-        sprintf(line2Buf, "%s", "HEATING");
+        sprintf(operatingStatusMessage, "%s", "HEATING");
     }else{
-        sprintf(line2Buf, "%s", "NOT DEFINED");
+        sprintf(operatingStatusMessage, "%s", "NOT DEFINED");
     }
 
     //ファン, ヒータ制御
@@ -171,7 +174,7 @@ void operatingAction()
     }
 
     //LCDに反映
-    indicateCurrentStatus(currentTemperature, line2Buf);
+    indicateCurrentStatus(currentTemperature, operatingStatusMessage);
 }
 void settingAction()
 {
@@ -202,7 +205,7 @@ void settingAction()
         }
     }
 }
-void systemAction(SystemStatus_t status)
+void systemAction(SystemStatus_t systemStatus)
 {
     //UVスイッチ監視, 制御
     if(uvControlSwitch == UV_SWITCH_ON){
@@ -215,7 +218,7 @@ void systemAction(SystemStatus_t status)
 
     static bool outOfSettingModeFlag = true;
 
-    if(status == SYSTEM_OPERATING){
+    if(systemStatus == SYSTEM_OPERATING){
         outOfSettingModeFlag = true;
 
         if(!isTimerStatrted){
@@ -284,6 +287,15 @@ SystemStatus_t getRequiredSystemStatus()
     }else{
         result = SYSTEM_OPERATING;
     }
+
+    return result;
+}
+CageStatus_t GetCageStatus()
+{
+    CageStatus_t result;
+
+    result.temperature = currentTemperature;
+    sprintf(result.statusMessage, "%s", operatingStatusMessage);
 
     return result;
 }

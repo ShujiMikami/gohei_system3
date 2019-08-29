@@ -3,6 +3,7 @@
 #include "EthernetInterface.h"
 #include <stdio.h>
 #include <string.h>
+#include "HTTPAnalyze.h"
 
 #define PORT   80
 
@@ -24,7 +25,7 @@ DigitalOut speedLamp(p29);
 //なぜかTickを宣言しないとEthernetがこける
 Ticker dummyTick;
 
-
+void requestAction(char* requestMessage);
 
 void EtherStatusLampThreadFunc()
 {
@@ -100,6 +101,7 @@ void ServerThreadFunc()
                         break;
                     default:
                         printf("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer),strlen(buffer),buffer);
+                        requestAction(buffer);
                         if(buffer[0] == 'G' && buffer[1] == 'E' && buffer[2] == 'T' ) {
                             printf("[Server Thread]GET request incomming.\n\r");
                             //setup http response header & data
@@ -118,4 +120,17 @@ void ServerThreadFunc()
             led2 = false;
         }
     }
+}
+void requestAction(char* requestMessage)
+{
+    //request line
+    HTTPRequest_t request(requestMessage);
+
+    char requestLine[50];
+
+    request.GetRequestLine(requestLine, sizeof(requestLine));
+
+    printf("request line = %s\r\n", requestLine);
+    
+    
 }

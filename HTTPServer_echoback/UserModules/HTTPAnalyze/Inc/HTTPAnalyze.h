@@ -1,7 +1,6 @@
 #ifndef _HTTPANALYZE_H_
 #define _HTTPANALYZE_H_
 
-#define HTTP_REQUEST_BUFFER_SIZE 1024
 
 class HTTPRequest_t{
 typedef enum{
@@ -11,13 +10,14 @@ typedef enum{
 }HTTPMethod_t;
 public:
 private:
-    char messageBuffer[HTTP_REQUEST_BUFFER_SIZE];
+    char* messageBuffer;
     char* requestLine;
     char* uri;
     char* protocolVersion;
     char* header;
 public:
-    HTTPRequest_t(char* data);
+    HTTPRequest_t(char* binaryData);
+    ~HTTPRequest_t();
     void GetRequestLine(char* buffer, unsigned short bufferSize);
     HTTPMethod_t GetMethod();
     void GetURI(char* buffer, unsigned short bufferSize);

@@ -20,8 +20,10 @@ int main (void)
         printf("[Main Thread]Toggle LED\r\n");
         led1 = !led1;
 
-        wait(0.5);
+        CageStatus_t cageStatus = GetCageStatus();
+        printf("[Main Thread]Cage Status check. Temperature = %2.1f, Operation = %s\r\n", cageStatus.temperature, cageStatus.statusMessage);
 
+        wait(10);
     }
 
     return 0;
