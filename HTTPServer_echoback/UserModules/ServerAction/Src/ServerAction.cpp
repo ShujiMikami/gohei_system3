@@ -89,8 +89,13 @@ void ServerThreadFunc()
             led2 = true;
             
             while(clientIsConnected) {
-                char buffer[1024] = {};
-                switch(client.receive(buffer, 1023)) {
+                char buffer[400] = {};
+
+                int receiveStatus = client.receive(buffer, 399);
+
+                
+
+                switch(receiveStatus) {
                     case 0:
                         printf("[Server Thread]recieved buffer is empty.\n\r");
                         clientIsConnected = false;
@@ -101,17 +106,19 @@ void ServerThreadFunc()
                         break;
                     default:
                         printf("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer),strlen(buffer),buffer);
-                        requestAction(buffer);
+                        //requestAction(buffer);
+                        
                         if(buffer[0] == 'G' && buffer[1] == 'E' && buffer[2] == 'T' ) {
-                            printf("[Server Thread]GET request incomming.\n\r");
+                            //printf("[Server Thread]GET request incomming.\n\r");
                             //setup http response header & data
-                            char echoHeader[256] = {};
-                            sprintf(echoHeader,"HTTP/1.1 200 OK\n\rContent-Length: %d\n\rContent-Type: text\n\rConnection: Close\n\r\n\r",strlen(buffer));
-                            client.send(echoHeader,strlen(echoHeader));
-                            client.send(buffer,strlen(buffer));
-                            clientIsConnected = false;
-                            printf("[Server Thread]echo back done.\n\r");
+                            //char echoHeader[256] = {};
+                            //sprintf(echoHeader,"HTTP/1.1 200 OK\n\rContent-Length: %d\n\rContent-Type: text\n\rConnection: Close\n\r\n\r",strlen(buffer));
+                            //client.send(echoHeader,strlen(echoHeader));
+                            //client.send(buffer,strlen(buffer));
+                            //clientIsConnected = false;
+                            //printf("[Server Thread]echo back done.\n\r");
                         }
+                        
                         break;
                 }
             }
