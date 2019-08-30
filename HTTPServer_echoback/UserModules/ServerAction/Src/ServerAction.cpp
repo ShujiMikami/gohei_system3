@@ -106,7 +106,7 @@ void ServerThreadFunc()
                         break;
                     default:
                         printf("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer),strlen(buffer),buffer);
-                        //requestAction(buffer);
+                        requestAction(buffer);
                         
                         if(buffer[0] == 'G' && buffer[1] == 'E' && buffer[2] == 'T' ) {
                             //printf("[Server Thread]GET request incomming.\n\r");
@@ -141,6 +141,16 @@ void requestAction(char* requestMessage)
 
     request.GetURI(requestLine, sizeof(requestLine));
     printf("uri is = %s\r\n", requestLine);
+
+    if(strcmp(requestLine, "/") == 0){
+       char html[] = "<h1>Wi-Fi Settings</h1>";
+       char echoHeader[256] = {};
+       sprintf(echoHeader,"HTTP/1.1 200 OK\n\rContent-Length: %d\n\rContent-Type: text\n\rConnection: Close\n\r\n\r",strlen(html));
+
+       client.send(echoHeader,strlen(echoHeader));
+       client.send(html,strlen(html));
+       clientIsConnected = false;
+    }
 
 
     request.GetProtocolVersion(requestLine, sizeof(requestLine));
