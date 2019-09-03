@@ -140,6 +140,7 @@ OBJECTS += UserModules/BoardControler/Src/BoardControler.o
 OBJECTS += UserModules/LCDDriver/Src/LCDDriver.o
 OBJECTS += UserModules/ThermistorCalculator/Src/ThermistorCalculator.o
 OBJECTS += UserModules/CageDriver/Src/CageDriver.o
+OBJECTS += UserModules/ServerAction/Src/HTTPGenerator.o
 
 
  SYS_OBJECTS += mbed/TARGET_LPC1768/TOOLCHAIN_GCC_ARM/CRP.o

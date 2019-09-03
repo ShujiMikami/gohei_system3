@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "HTTPAnalyze.h"
+#include "HTTPGenerator.h"
 
 #define PORT   80
 
@@ -143,14 +144,27 @@ void requestAction(char* requestMessage)
     printf("uri is = %s\r\n", requestLine);
 
     if(strcmp(requestLine, "/") == 0){
-       char html[] = "<h1>Wi-Fi Settings</h1>";
-       char echoHeader[256] = {};
-       sprintf(echoHeader,"HTTP/1.1 200 OK\n\rContent-Length: %d\n\rContent-Type: text\n\rConnection: Close\n\r\n\r",strlen(html));
+        char htmlToSend[256] = {};
+        char message[] = "Cooling";
+        CreateTopPage(htmlToSend, sizeof(htmlToSend), 25.5, message);
+        printf("[Server Thread]%s", htmlToSend);
 
-       client.send(echoHeader,strlen(echoHeader));
-       client.send(html,strlen(html));
-       clientIsConnected = false;
+        client.send(htmlToSend, strlen(htmlToSend));
+
+       
+        clientIsConnected = false;
+    }else if(strcmp(requestLine, "UVToggle")){
+        char htmlToSend[256] = {};
+        char message[] = "Cooling";
+        CreateTopPage(htmlToSend, sizeof(htmlToSend), 30.5, message);
+        printf("[Server Thread]%s", htmlToSend);
+
+        client.send(htmlToSend, strlen(htmlToSend));
+
+       
+        clientIsConnected = false;
     }
+
 
 
     request.GetProtocolVersion(requestLine, sizeof(requestLine));
