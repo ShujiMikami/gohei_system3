@@ -28,6 +28,9 @@ Ticker dummyTick;
 
 void requestAction(char* requestMessage);
 
+//DHCPServerConnection
+static void connectToDHCPServer(char* gotIPAddressBuffer, int bufferLength);
+
 void EtherStatusLampThreadFunc()
 {
     while(true){
@@ -47,18 +50,7 @@ void ServerThreadFunc()
 
     //Connect to DHCP server
     bool connectedToDHCPServer = false;
-    while(!connectedToDHCPServer){
-        printf("[Server Thread]Trying to connect DHCPServer...\r\n");
 
-        int connectionResult = eth.connect();
-
-        if(connectionResult == 0){
-            printf("[Server Thread]connection success\r\n");
-            connectedToDHCPServer = true;
-        } else {
-            printf("[Server Thread]connection fail\r\n");
-        }
-    }
 
 
     printf("[Server Thread]IP Address is %s\n\r", eth.getIPAddress());
@@ -94,8 +86,6 @@ void ServerThreadFunc()
 
                 int receiveStatus = client.receive(buffer, 399);
 
-                
-
                 switch(receiveStatus) {
                     case 0:
                         printf("[Server Thread]recieved buffer is empty.\n\r");
@@ -108,18 +98,6 @@ void ServerThreadFunc()
                     default:
                         printf("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer),strlen(buffer),buffer);
                         requestAction(buffer);
-                        
-                        if(buffer[0] == 'G' && buffer[1] == 'E' && buffer[2] == 'T' ) {
-                            //printf("[Server Thread]GET request incomming.\n\r");
-                            //setup http response header & data
-                            //char echoHeader[256] = {};
-                            //sprintf(echoHeader,"HTTP/1.1 200 OK\n\rContent-Length: %d\n\rContent-Type: text\n\rConnection: Close\n\r\n\r",strlen(buffer));
-                            //client.send(echoHeader,strlen(echoHeader));
-                            //client.send(buffer,strlen(buffer));
-                            //clientIsConnected = false;
-                            //printf("[Server Thread]echo back done.\n\r");
-                        }
-                        
                         break;
                 }
             }
@@ -139,7 +117,6 @@ void requestAction(char* requestMessage)
     request.GetRequestLine(requestLine, sizeof(requestLine));
     printf("request line = %s\r\n", requestLine);
 
-
     request.GetURI(requestLine, sizeof(requestLine));
     printf("uri is = %s\r\n", requestLine);
 
@@ -150,7 +127,6 @@ void requestAction(char* requestMessage)
         printf("[Server Thread]%s", htmlToSend);
 
         client.send(htmlToSend, strlen(htmlToSend));
-
        
         clientIsConnected = false;
     }else if(strcmp(requestLine, "UVToggle")){
@@ -161,12 +137,23 @@ void requestAction(char* requestMessage)
 
         client.send(htmlToSend, strlen(htmlToSend));
 
-       
         clientIsConnected = false;
     }
 
-
-
     request.GetProtocolVersion(requestLine, sizeof(requestLine));
     printf("protocol is %s \r\n", requestLine);
+}
+
+void connectToDHCPServer(char* gotIPAddressBuffer, int bufferLength)
+{
+    while(true){
+        printf("[Server Thread]Trying to connect DHCPServer...\r\n");
+
+        if(eth.connect() == 0){
+            printf("[Server Thread]connection success\r\n");
+            break;
+        } else {
+            printf("[Server Thread]connection fail\r\n");
+        }
+    }
 }
