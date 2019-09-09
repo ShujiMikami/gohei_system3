@@ -5,6 +5,7 @@
 #include <string.h>
 #include "HTTPAnalyze.h"
 #include "HTTPGenerator.h"
+#include "CageDriver.h"
 
 #define PORT   80
 
@@ -29,7 +30,7 @@ Ticker dummyTick;
 void requestAction(char* requestMessage);
 
 //DHCPServerConnection
-static void connectToDHCPServer(char* gotIPAddressBuffer, int bufferLength);
+static void connectToDHCPServer();
 
 void EtherStatusLampThreadFunc()
 {
@@ -49,10 +50,9 @@ void ServerThreadFunc()
     printf("[Server Thread]MAC Address = %s\r\n", eth.getMACAddress());
 
     //Connect to DHCP server
-    bool connectedToDHCPServer = false;
+    connectToDHCPServer();
 
-
-
+    //Print IP Address
     printf("[Server Thread]IP Address is %s\n\r", eth.getIPAddress());
 
     //setup tcp socket
@@ -144,7 +144,7 @@ void requestAction(char* requestMessage)
     printf("protocol is %s \r\n", requestLine);
 }
 
-void connectToDHCPServer(char* gotIPAddressBuffer, int bufferLength)
+void connectToDHCPServer()
 {
     while(true){
         printf("[Server Thread]Trying to connect DHCPServer...\r\n");

@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void CreateTopPage(char* buffer, uint16_t bufferLength, double temperature, char* controlStatus);
+void CreateTopPage(char* buffer, uint16_t bufferLength, double temperature, char* controlStatus, char* uvControlStatus);
 
 #endif
