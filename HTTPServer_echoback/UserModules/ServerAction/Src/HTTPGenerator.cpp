@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-static void createHTMLBody(char* buffer, uint16_t bufferLength, double temperature, char* controlStatus);
+static void createHTMLBody(char* buffer, uint16_t bufferLength, double temperature, char* controlStatus, char* uvCOntrolStatus);
 
 void CreateTopPage(char* buffer, uint16_t bufferLength, double temperature, char* controlStatus, char* uvControlStatus)
 {

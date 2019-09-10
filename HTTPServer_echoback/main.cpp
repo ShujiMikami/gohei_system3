@@ -21,7 +21,7 @@ int main (void)
         led1 = !led1;
 
         CageStatus_t cageStatus = GetCageStatus();
-        printf("[Main Thread]Cage Status check. Temperature = %2.1f, Operation = %s\r\n", cageStatus.temperature, cageStatus.statusMessage);
+        printf("[Main Thread]Cage Status check. Temperature = %2.1f, Operation = %s, UV = %s\r\n", cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
 
         wait(10);
     }

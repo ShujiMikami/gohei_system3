@@ -11,5 +11,6 @@ void CageDriveThread();
 CageStatus_t GetCageStatus();
 void UVOnFromEther();
 void UVOffFromEther();
+void UVToggleFromEther();
 
 #endif

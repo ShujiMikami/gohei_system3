@@ -321,8 +321,20 @@ void UVOnFromEther()
 {
     isRemoteControlEnabled = true;
     uvControlFlag_Ether = UV_SWITCH_ON;
+
+    while(uvControl != uvControlFlag_Ether);
 }
 void UVOffFromEther(){
     isRemoteControlEnabled = true;
     uvControlFlag_Ether = UV_SWITCH_OFF;
+    
+    while(uvControl != uvControlFlag_Ether);
+}
+void UVToggleFromEther()
+{
+    if(uvControlFlag_Ether == UV_SWITCH_ON){
+        UVOffFromEther();
+    }else{
+        UVOnFromEther();
+    }
 }
