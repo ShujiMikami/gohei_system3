@@ -104,6 +104,8 @@ void initializePinSetting();
 //外部から覗ける変数
 static double currentTemperature = 0;
 static char operatingStatusMessage[26];
+static int uvControlFlag_Ether = UV_SWITCH_OFF;
+static bool isRemoteControlEnabled = false;
 
 void CageDriveThread() {
     //起動メッセージ表示
@@ -178,7 +180,6 @@ void operatingAction()
 }
 void settingAction()
 {
-
     static bool buttonEnabled = true;
 
     if(buttonEnabled){
@@ -208,10 +209,18 @@ void settingAction()
 void systemAction(SystemStatus_t systemStatus)
 {
     //UVスイッチ監視, 制御
-    if(uvControlSwitch == UV_SWITCH_ON){
-        uvControl = CONTROL_STATUS_ON;
-    }else{
-        uvControl = CONTROL_STATUS_OFF;
+    if(!isRemoteControlEnabled){//リモート制御無効時
+        if(uvControlSwitch == UV_SWITCH_ON){
+            uvControl = CONTROL_STATUS_ON;
+        }else{
+            uvControl = CONTROL_STATUS_OFF;
+        }
+    }else{//リモート制御が有効時
+        if(uvControlFlag_Ether == UV_SWITCH_ON){
+            uvControl = CONTROL_STATUS_ON;
+        }else{
+            uvControl = CONTROL_STATUS_OFF;
+        }
     }
 
     static bool isTimerStatrted = false;
@@ -232,6 +241,9 @@ void systemAction(SystemStatus_t systemStatus)
             printf("[CageDrive Thread]Operating Period\r\n");
         }
     }else{
+        //SettingModeに入ると, Ether制御を無効にする
+        isRemoteControlEnabled = false;
+
         timer.stop();
         timer.reset();
         isTimerStatrted = false;
@@ -297,5 +309,32 @@ CageStatus_t GetCageStatus()
     result.temperature = currentTemperature;
     sprintf(result.statusMessage, "%s", operatingStatusMessage);
 
+    if(uvControl == UV_SWITCH_ON){
+        strcpy(result.uvStatusMessage, "ON");
+    }else{
+        strcpy(result.uvStatusMessage, "OFF");
+    }
+
     return result;
+}
+void UVOnFromEther()
+{
+    isRemoteControlEnabled = true;
+    uvControlFlag_Ether = UV_SWITCH_ON;
+
+    while(uvControl != uvControlFlag_Ether);
+}
+void UVOffFromEther(){
+    isRemoteControlEnabled = true;
+    uvControlFlag_Ether = UV_SWITCH_OFF;
+    
+    while(uvControl != uvControlFlag_Ether);
+}
+void UVToggleFromEther()
+{
+    if(uvControlFlag_Ether == UV_SWITCH_ON){
+        UVOffFromEther();
+    }else{
+        UVOnFromEther();
+    }
 }
