@@ -7,10 +7,11 @@ DigitalOut led1(LED1); //server listning status
 
 int main (void)
 {
+    wait(5);
     Thread threadEtherLamp;
     threadEtherLamp.start(EtherStatusLampThreadFunc);
     
-    Thread threadServer;
+    Thread threadServer(osPriorityNormal, DEFAULT_STACK_SIZE * 3);
     threadServer.start(ServerThreadFunc);
 
     Thread threadCageDrive;

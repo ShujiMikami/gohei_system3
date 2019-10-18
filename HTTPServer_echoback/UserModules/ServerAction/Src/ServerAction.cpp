@@ -112,7 +112,7 @@ void requestAction(char* requestMessage)
     //request line
     HTTPRequest_t request(requestMessage);
 
-    char requestLine[50];
+    char requestLine[250];
 
     request.GetRequestLine(requestLine, sizeof(requestLine));
     printf("request line = %s\r\n", requestLine);
