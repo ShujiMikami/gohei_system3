@@ -149,7 +149,20 @@ void requestAction(char* requestMessage)
         DEBUG_PRINT("[Server Thread]%s", htmlToSend);
 
         client.send(htmlToSend, strlen(htmlToSend));
+    }else if(strcmp(requestLine, "/UVToggle?") == 0){
+        char htmlToSend[1024] = {};
+
+        UVToggleFromEther();
+
+        CageStatus_t cageStatus = GetCageStatus();
+
+        CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
+        DEBUG_PRINT("[Server Thread]toggle page access\r\n");
+        DEBUG_PRINT("[Server Thread]%s", htmlToSend);
+
+        client.send(htmlToSend, strlen(htmlToSend));
     }
+
 
     clientIsConnected = false;
     request.GetProtocolVersion(requestLine, sizeof(requestLine));
