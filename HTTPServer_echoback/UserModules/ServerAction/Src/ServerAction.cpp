@@ -7,6 +7,15 @@
 #include "HTTPGenerator.h"
 #include "CageDriver.h"
 
+#define DEBUG
+
+#ifdef DEBUG
+#define DEBUG_PRINT(...) printf(__VA_ARGS__)
+#else
+#define DEBUG_PRINT(...) while(0)
+#endif
+
+
 #define PORT   80
 
 EthernetInterface eth;
@@ -47,61 +56,63 @@ void ServerThreadFunc()
     eth.init(); //Use DHCP
     
     //Print MAC Address
-    printf("[Server Thread]MAC Address = %s\r\n", eth.getMACAddress());
+    DEBUG_PRINT("[Server Thread]MAC Address = %s\r\n", eth.getMACAddress());
 
     //Connect to DHCP server
     connectToDHCPServer();
 
     //Print IP Address
-    printf("[Server Thread]IP Address is %s\n\r", eth.getIPAddress());
+    DEBUG_PRINT("[Server Thread]IP Address is %s\n\r", eth.getIPAddress());
 
     //setup tcp socket
     if(svr.bind(PORT)< 0) {
-        printf("[Server Thread]tcp server bind failed.\n\r");
+        DEBUG_PRINT("[Server Thread]tcp server bind failed.\n\r");
         return;
     } else {
-        printf("[Server Thread]tcp server bind successed.\n\r");
+        DEBUG_PRINT("[Server Thread]tcp server bind successed.\n\r");
         serverIsListened = true;
     }
 
     if(svr.listen(1) < 0) {
-        printf("[Server Thread]tcp server listen failed.\n\r");
+        DEBUG_PRINT("[Server Thread]tcp server listen failed.\n\r");
         return;
     } else {
-        printf("[Server Thread]tcp server is listening...\n\r");
+        DEBUG_PRINT("[Server Thread]tcp server is listening...\n\r");
     }
 
     //listening for http GET request
     while (serverIsListened) {
         //blocking mode(never timeout)
         if(svr.accept(client)<0) {
-            printf("[Server Thread]failed to accept connection.\n\r");
+            DEBUG_PRINT("[Server Thread]failed to accept connection.\n\r");
         } else {
-            printf("[Server Thread]connection success!\n\rIP: %s\n\r",client.get_address());
+            DEBUG_PRINT("[Server Thread]connection success!\n\rIP: %s\n\r",client.get_address());
             clientIsConnected = true;
             led2 = true;
             
+            char buffer[2048] = {};
+            int pos = 0;
             while(clientIsConnected) {
-                char buffer[400] = {};
 
-                int receiveStatus = client.receive(buffer, 399);
+                int receiveStatus = client.receive(buffer + pos, 2047 - pos);
 
                 switch(receiveStatus) {
                     case 0:
-                        printf("[Server Thread]recieved buffer is empty.\n\r");
+                        DEBUG_PRINT("[Server Thread]recieved buffer is empty.\n\r");
                         clientIsConnected = false;
                         break;
                     case -1:
-                        printf("[Server Thread]failed to read data from client.\n\r");
+                        DEBUG_PRINT("[Server Thread]failed to read data from client.\n\r");
                         clientIsConnected = false;
                         break;
                     default:
-                        printf("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer),strlen(buffer),buffer);
-                        requestAction(buffer);
+                        pos += strlen(buffer);
+                        DEBUG_PRINT("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer), strlen(buffer), buffer);
                         break;
                 }
             }
-            printf("[Server Thread]close connection.\n\r[Server Thread]tcp server is listening...\n\r");
+            requestAction(buffer);
+            DEBUG_PRINT("[Server Thread]close connection.\n\r[Server Thread]tcp server is listening...\n\r");
             client.close();
             led2 = false;
         }
@@ -115,33 +126,31 @@ void requestAction(char* requestMessage)
     char requestLine[250];
 
     request.GetRequestLine(requestLine, sizeof(requestLine));
-    printf("request line = %s\r\n", requestLine);
+    DEBUG_PRINT("request line = %s\r\n", requestLine);
 
     request.GetURI(requestLine, sizeof(requestLine));
-    printf("uri is = %s\r\n", requestLine);
+    DEBUG_PRINT("uri is = %s\r\n", requestLine);
 
     if(strcmp(requestLine, "/") == 0){
         char htmlToSend[256] = {};
-        char message[] = "Cooling";
         
         CageStatus_t cageStatus = GetCageStatus();
         //CreateTopPage(htmlToSend, sizeof(htmlToSend), 25.5, message, "NON");
         CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
-        printf("[Server Thread]%s", htmlToSend);
+        DEBUG_PRINT("[Server Thread]%s", htmlToSend);
 
         client.send(htmlToSend, strlen(htmlToSend));
        
         clientIsConnected = false;
     }else if(strcmp(requestLine, "./UVToggle")){
         char htmlToSend[256] = {};
-        char message[] = "Cooling";
 
         UVToggleFromEther();
 
         CageStatus_t cageStatus = GetCageStatus();
 
         CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
-        printf("[Server Thread]%s", htmlToSend);
+        DEBUG_PRINT("[Server Thread]%s", htmlToSend);
 
         client.send(htmlToSend, strlen(htmlToSend));
 
@@ -149,19 +158,19 @@ void requestAction(char* requestMessage)
     }
 
     request.GetProtocolVersion(requestLine, sizeof(requestLine));
-    printf("protocol is %s \r\n", requestLine);
+    DEBUG_PRINT("protocol is %s \r\n", requestLine);
 }
 
 void connectToDHCPServer()
 {
     while(true){
-        printf("[Server Thread]Trying to connect DHCPServer...\r\n");
+        DEBUG_PRINT("[Server Thread]Trying to connect DHCPServer...\r\n");
 
         if(eth.connect() == 0){
-            printf("[Server Thread]connection success\r\n");
+            DEBUG_PRINT("[Server Thread]connection success\r\n");
             break;
         } else {
-            printf("[Server Thread]connection fail\r\n");
+            DEBUG_PRINT("[Server Thread]connection fail\r\n");
         }
     }
 }
