@@ -90,11 +90,9 @@ void ServerThreadFunc()
             clientIsConnected = true;
             led2 = true;
             
-            char buffer[2048] = {};
-            int pos = 0;
             while(clientIsConnected) {
-
-                int receiveStatus = client.receive(buffer + pos, 2047 - pos);
+                char buffer[1024] = {};
+                int receiveStatus = client.receive(buffer, 1023);
 
                 switch(receiveStatus) {
                     case 0:
@@ -106,12 +104,11 @@ void ServerThreadFunc()
                         clientIsConnected = false;
                         break;
                     default:
-                        pos += strlen(buffer);
+                        requestAction(buffer);
                         DEBUG_PRINT("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer), strlen(buffer), buffer);
                         break;
                 }
             }
-            requestAction(buffer);
             DEBUG_PRINT("[Server Thread]close connection.\n\r[Server Thread]tcp server is listening...\n\r");
             client.close();
             led2 = false;
@@ -132,31 +129,29 @@ void requestAction(char* requestMessage)
     DEBUG_PRINT("uri is = %s\r\n", requestLine);
 
     if(strcmp(requestLine, "/") == 0){
-        char htmlToSend[256] = {};
+        char htmlToSend[1024] = {};
         
         CageStatus_t cageStatus = GetCageStatus();
-        //CreateTopPage(htmlToSend, sizeof(htmlToSend), 25.5, message, "NON");
         CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
+        DEBUG_PRINT("[Server Thread]Top page access\r\n");
         DEBUG_PRINT("[Server Thread]%s", htmlToSend);
 
         client.send(htmlToSend, strlen(htmlToSend));
-       
-        clientIsConnected = false;
-    }else if(strcmp(requestLine, "./UVToggle")){
-        char htmlToSend[256] = {};
+    }else if(strcmp(requestLine, "/UVToggle") == 0){
+        char htmlToSend[1024] = {};
 
         UVToggleFromEther();
 
         CageStatus_t cageStatus = GetCageStatus();
 
         CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
+        DEBUG_PRINT("[Server Thread]toggle page access\r\n");
         DEBUG_PRINT("[Server Thread]%s", htmlToSend);
 
         client.send(htmlToSend, strlen(htmlToSend));
-
-        clientIsConnected = false;
     }
 
+    clientIsConnected = false;
     request.GetProtocolVersion(requestLine, sizeof(requestLine));
     DEBUG_PRINT("protocol is %s \r\n", requestLine);
 }
