@@ -6,17 +6,18 @@ static void createHTMLBody(char* buffer, uint16_t bufferLength, double temperatu
 
 void CreateTopPage(char* buffer, uint16_t bufferLength, double temperature, char* controlStatus, char* uvControlStatus)
 {
-    char html[256];
+    char html[512];
     createHTMLBody(html, sizeof(html), temperature, controlStatus, uvControlStatus);
     
     if(bufferLength > strlen(html)){
-        sprintf(buffer, "HTTP/1.1 200 OK\n\rContent-Length: %d\n\rContent-Type: text\n\rConnection: Close\n\r\n\r%s\r\n", strlen(html), html);
+        //sprintf(buffer, "HTTP/1.1 200 OK\n\rContent-Length: %d\n\rContent-Type: text\n\rConnection: Close\n\r\n\r%s\r\n", strlen(html), html);
+        sprintf(buffer, "HTTP/1.1 200 OK\n\rContent-Length: %d\n\rContent-Type: text/html\n\rConnection: Close\n\r\n\r%s\n\r", strlen(html), html);
     }
 }
 void createHTMLBody(char* buffer, uint16_t bufferLength, double temperature, char* controlStatus, char* uvControlStatus)
 {
     //title
-    char htmlBody[256] = {};
+    char htmlBody[512] = {};
 
     sprintf(htmlBody, 
             "<h1>Gohei System ver3</h1>"
