@@ -35,6 +35,14 @@ void requestAction(char* requestMessage);
 //DHCPServerConnection
 static void connectToDHCPServer();
 
+//ForDebug
+static void printRequestLine(HTTPRequest_t request);
+static void printURI(HTTPRequest_t request);
+static void printProtocol(HTTPRequest_t request);
+
+//Send Page
+static void sendPage();
+
 void ServerThreadFunc()
 {
     //setup ethernet interface
@@ -105,53 +113,32 @@ void requestAction(char* requestMessage)
     //request line
     HTTPRequest_t request(requestMessage);
 
-    char requestLine[250];
+    printRequestLine(request);
+    printURI(request);
+    printProtocol(request);
 
-    request.GetRequestLine(requestLine, sizeof(requestLine));
-    DEBUG_PRINT("request line = %s\r\n", requestLine);
+    char uri[128];
+    request.GetURI(uri, sizeof(uri));
 
-    request.GetURI(requestLine, sizeof(requestLine));
-    DEBUG_PRINT("uri is = %s\r\n", requestLine);
-
-    if(strcmp(requestLine, "/") == 0){
-        char htmlToSend[1024] = {};
-        
-        CageStatus_t cageStatus = GetCageStatus();
-        CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
+    if(strcmp(uri, "/") == 0){
         DEBUG_PRINT("[Server Thread]Top page access\r\n");
-        DEBUG_PRINT("[Server Thread]%s", htmlToSend);
 
-        client.send(htmlToSend, strlen(htmlToSend));
-    }else if(strcmp(requestLine, "/UVToggle") == 0){
-        char htmlToSend[1024] = {};
-
+        sendPage();
+    }else if(strcmp(uri, "/UVToggle") == 0){
         UVToggleFromEther();
 
-        CageStatus_t cageStatus = GetCageStatus();
-
-        CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
         DEBUG_PRINT("[Server Thread]toggle page access\r\n");
-        DEBUG_PRINT("[Server Thread]%s", htmlToSend);
 
-        client.send(htmlToSend, strlen(htmlToSend));
-    }else if(strcmp(requestLine, "/UVToggle?") == 0){
-        char htmlToSend[1024] = {};
-
+        sendPage();
+    }else if(strcmp(uri, "/UVToggle?") == 0){
         UVToggleFromEther();
 
-        CageStatus_t cageStatus = GetCageStatus();
-
-        CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
         DEBUG_PRINT("[Server Thread]toggle page access\r\n");
-        DEBUG_PRINT("[Server Thread]%s", htmlToSend);
 
-        client.send(htmlToSend, strlen(htmlToSend));
+        sendPage();
     }
 
-
     clientIsConnected = false;
-    request.GetProtocolVersion(requestLine, sizeof(requestLine));
-    DEBUG_PRINT("protocol is %s \r\n", requestLine);
 }
 
 void connectToDHCPServer()
@@ -166,4 +153,33 @@ void connectToDHCPServer()
             DEBUG_PRINT("[Server Thread]connection fail\r\n");
         }
     }
+}
+void printRequestLine(HTTPRequest_t request)
+{
+    char requestLine[250];
+    request.GetRequestLine(requestLine, sizeof(requestLine));
+    DEBUG_PRINT("request line = %s\r\n", requestLine);
+}
+void printURI(HTTPRequest_t request)
+{
+    char uri[250];
+    request.GetURI(uri, sizeof(uri));
+    DEBUG_PRINT("uri is = %s\r\n", uri);
+}
+void sendPage()
+{
+    char htmlToSend[1024] = {};
+
+    CageStatus_t cageStatus = GetCageStatus();
+    CreateTopPage(htmlToSend, sizeof(htmlToSend), cageStatus.temperature, cageStatus.statusMessage, cageStatus.uvStatusMessage);
+    
+    DEBUG_PRINT("[Server Thread]send : %s", htmlToSend);
+
+    client.send(htmlToSend, strlen(htmlToSend));
+}
+void printProtocol(HTTPRequest_t request)
+{
+    char uri[250];
+    request.GetProtocolVersion(requestLine, sizeof(requestLine));
+    DEBUG_PRINT("[Server Thread]protocol is %s \r\n", requestLine);
 }
