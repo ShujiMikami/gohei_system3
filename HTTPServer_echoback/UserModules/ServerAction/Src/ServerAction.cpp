@@ -26,7 +26,7 @@ TCPSocketConnection client;
 DigitalOut led2(LED2); //socket connecting status
 
 //なぜかTickを宣言しないとEthernetがこける
-Ticker dummyTick;
+//Ticker dummyTick;
 
 void requestAction(char* requestMessage);
 
