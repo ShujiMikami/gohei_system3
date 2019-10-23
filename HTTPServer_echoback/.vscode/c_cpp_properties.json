@@ -84,7 +84,8 @@
                 "DEVICE_MPU=1"
             ],
             "cStandard": "c11",
-            "cppStandard": "c++17"
+            "cppStandard": "c++17",
+            "compileCommands": "${workspaceFolder}/compile_commands.json"
         },
         {
             "forcedInclude": [

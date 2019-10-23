@@ -5,6 +5,13 @@
 #include "stdio.h"
 #include "CageDriver.h"
 
+#ifdef DEBUG
+#define DEBUG_PRINT(...) printf(__VA_ARGS__)
+#else
+#define DEBUG_PRINT(...) while(0)
+#endif
+
+
 //バージョン番号
 const char versionNumber[] = "Ver 0.0.2";
 
@@ -109,7 +116,7 @@ static bool isRemoteControlEnabled = false;
 
 void CageDriveThread() {
     //起動メッセージ表示
-    printf("[CageDrive Thread]Initial Message\r\n");
+    DEBUG_PRINT("[CageDrive Thread]Initial Message\r\n");
     indicateInitialMessage();
 
     //入力ピンinitialize
@@ -238,7 +245,7 @@ void systemAction(SystemStatus_t systemStatus)
         if(timer.read() > operatingPeriod){
             operatingAction();
             timer.reset();
-            printf("[CageDrive Thread]Operating Period\r\n");
+            DEBUG_PRINT("[CageDrive Thread]Operating Period\r\n");
         }
     }else{
         //SettingModeに入ると, Ether制御を無効にする
@@ -252,7 +259,7 @@ void systemAction(SystemStatus_t systemStatus)
         if(outOfSettingModeFlag){
             indicateSetTemperature();
             outOfSettingModeFlag = false;
-            printf("[CageDrive Thread]Setting Mode\r\n");
+            DEBUG_PRINT("[CageDrive Thread]Setting Mode\r\n");
         }
 
         settingAction();
