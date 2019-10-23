@@ -20,7 +20,6 @@
 EthernetInterface eth;
 
 TCPSocketServer svr;
-bool serverIsListened = false;
 
 TCPSocketConnection client;
 bool clientIsConnected = false;
@@ -32,8 +31,14 @@ Ticker dummyTick;
 
 void requestAction(char* requestMessage);
 
+//EthernetInterfaceSetup
+static void setupEthernetInterface();
+
 //DHCPServerConnection
 static void connectToDHCPServer();
+
+//TCPSocketSetup
+static bool setupTCPSocket();
 
 //ForDebug
 static void printRequestLine(HTTPRequest_t request);
@@ -46,32 +51,13 @@ static void sendPage();
 void ServerThreadFunc()
 {
     //setup ethernet interface
-    eth.init(); //Use DHCP
-    
-    //Print MAC Address
-    DEBUG_PRINT("[Server Thread]MAC Address = %s\r\n", eth.getMACAddress());
+    setupEthernetInterface();
 
     //Connect to DHCP server
     connectToDHCPServer();
 
-    //Print IP Address
-    DEBUG_PRINT("[Server Thread]IP Address is %s\n\r", eth.getIPAddress());
-
     //setup tcp socket
-    if(svr.bind(PORT)< 0) {
-        DEBUG_PRINT("[Server Thread]tcp server bind failed.\n\r");
-        return;
-    } else {
-        DEBUG_PRINT("[Server Thread]tcp server bind successed.\n\r");
-        serverIsListened = true;
-    }
-
-    if(svr.listen(1) < 0) {
-        DEBUG_PRINT("[Server Thread]tcp server listen failed.\n\r");
-        return;
-    } else {
-        DEBUG_PRINT("[Server Thread]tcp server is listening...\n\r");
-    }
+    bool serverIsListened = setupTCPSocket();
 
     //listening for http GET request
     while (serverIsListened) {
@@ -147,7 +133,9 @@ void connectToDHCPServer()
         DEBUG_PRINT("[Server Thread]Trying to connect DHCPServer...\r\n");
 
         if(eth.connect() == 0){
-            DEBUG_PRINT("[Server Thread]connection success\r\n");
+            DEBUG_PRINT("[Server Thread]connection success\r\n");    
+            //Print IP Address
+            DEBUG_PRINT("[Server Thread]IP Address is %s\n\r", eth.getIPAddress());
             break;
         } else {
             DEBUG_PRINT("[Server Thread]connection fail\r\n");
@@ -180,6 +168,38 @@ void sendPage()
 void printProtocol(HTTPRequest_t request)
 {
     char uri[250];
-    request.GetProtocolVersion(requestLine, sizeof(requestLine));
-    DEBUG_PRINT("[Server Thread]protocol is %s \r\n", requestLine);
+    request.GetProtocolVersion(uri, sizeof(uri));
+    DEBUG_PRINT("[Server Thread]protocol is %s \r\n", uri);
+}
+bool setupTCPSocket()
+{
+    bool result = true;
+
+    //setup tcp socket
+    if(svr.bind(PORT)< 0) {
+        DEBUG_PRINT("[Server Thread]tcp server bind failed.\n\r");
+        result = false;
+    } else {
+        DEBUG_PRINT("[Server Thread]tcp server bind successed.\n\r");
+        result = true;
+    }
+
+    if(result){
+        if(svr.listen(1) < 0) {
+            DEBUG_PRINT("[Server Thread]tcp server listen failed.\n\r");
+            result = false;
+        } else {
+            DEBUG_PRINT("[Server Thread]tcp server is listening...\n\r");
+            result = true;
+        }
+    }
+
+    return result;
+}
+void setupEthernetInterface()
+{
+    eth.init(); //Use DHCP
+    
+    //Print MAC Address
+    DEBUG_PRINT("[Server Thread]MAC Address = %s\r\n", eth.getMACAddress());
 }
