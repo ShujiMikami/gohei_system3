@@ -40,6 +40,9 @@ static void connectToDHCPServer();
 //TCPSocketSetup
 static bool setupTCPSocket();
 
+//check client connection
+static bool checkClientConnection();
+
 //ForDebug
 static void printRequestLine(HTTPRequest_t request);
 static void printURI(HTTPRequest_t request);
@@ -61,36 +64,34 @@ void ServerThreadFunc()
 
     //listening for http GET request
     while (serverIsListened) {
-        //blocking mode(never timeout)
-        if(svr.accept(client)<0) {
-            DEBUG_PRINT("[Server Thread]failed to accept connection.\n\r");
-        } else {
-            DEBUG_PRINT("[Server Thread]connection success!\n\rIP: %s\n\r",client.get_address());
-            clientIsConnected = true;
-            led2 = true;
-            
-            while(clientIsConnected) {
-                char buffer[1024] = {};
-                int receiveStatus = client.receive(buffer, 1023);
+        bool isClientConnected = checkClientConnection();
 
-                switch(receiveStatus) {
-                    case 0:
-                        DEBUG_PRINT("[Server Thread]recieved buffer is empty.\n\r");
-                        clientIsConnected = false;
-                        break;
-                    case -1:
-                        DEBUG_PRINT("[Server Thread]failed to read data from client.\n\r");
-                        clientIsConnected = false;
-                        break;
-                    default:
-                        requestAction(buffer);
-                        DEBUG_PRINT("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer), strlen(buffer), buffer);
-                        break;
-                }
+        while(isClientConnected) {
+            led2 = true;
+
+            char buffer[1024] = {};
+            int receiveStatus = client.receive(buffer, sizeof(buffer) - 1);
+
+            switch(receiveStatus) {
+                case 0:
+                    DEBUG_PRINT("[Server Thread]recieved buffer is empty.\n\r");
+                    isClientIsConnected = false;
+                    break;
+                case -1:
+                    DEBUG_PRINT("[Server Thread]failed to read data from client.\n\r");
+                    isClientIsConnected = false;
+                    break;
+                default:
+                    requestAction(buffer);
+                    DEBUG_PRINT("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer), strlen(buffer), buffer);
+                    break;
             }
-            DEBUG_PRINT("[Server Thread]close connection.\n\r[Server Thread]tcp server is listening...\n\r");
-            client.close();
-            led2 = false;
+
+            if(isClientIsConnected){
+                DEBUG_PRINT("[Server Thread]close connection.\n\r[Server Thread]tcp server is listening...\n\r");
+                client.close();
+                led2 = false;
+            }
         }
     }
 }
@@ -202,4 +203,19 @@ void setupEthernetInterface()
     
     //Print MAC Address
     DEBUG_PRINT("[Server Thread]MAC Address = %s\r\n", eth.getMACAddress());
+}
+bool checkClientConnection()
+{
+    bool result = false;
+
+    //blocking mode(never timeout)
+    if(svr.accept(client) < 0) {
+        DEBUG_PRINT("[Server Thread]failed to accept connection.\n\r");
+        result = false;
+    } else {
+        DEBUG_PRINT("[Server Thread]connection success!\n\rIP: %s\n\r",client.get_address());
+        result = true;
+    }
+
+    return result;
 }
