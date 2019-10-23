@@ -1,6 +1,7 @@
 #include "mbed.h"
 
 #include "ServerAction.h"
+#include "EthernetStatusLamp.h"
 #include "CageDriver.h"
 #include "rtos.h"
 

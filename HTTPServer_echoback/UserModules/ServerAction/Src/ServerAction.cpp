@@ -15,7 +15,6 @@
 #define DEBUG_PRINT(...) while(0)
 #endif
 
-
 #define PORT   80
 
 EthernetInterface eth;
@@ -28,11 +27,6 @@ bool clientIsConnected = false;
 
 DigitalOut led2(LED2); //socket connecting status
 
-DigitalIn linkSignal(P1_25);
-DigitalIn speedSignal(P1_26);
-DigitalOut linkLamp(p30);
-DigitalOut speedLamp(p29);
-
 //なぜかTickを宣言しないとEthernetがこける
 Ticker dummyTick;
 
@@ -40,15 +34,6 @@ void requestAction(char* requestMessage);
 
 //DHCPServerConnection
 static void connectToDHCPServer();
-
-void EtherStatusLampThreadFunc()
-{
-    while(true){
-        linkLamp = !linkSignal;
-        speedLamp = !speedSignal;
-        wait(0.05);
-    }
-}
 
 void ServerThreadFunc()
 {
