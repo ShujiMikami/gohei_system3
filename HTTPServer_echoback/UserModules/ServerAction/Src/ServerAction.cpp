@@ -22,7 +22,6 @@ EthernetInterface eth;
 TCPSocketServer svr;
 
 TCPSocketConnection client;
-bool clientIsConnected = false;
 
 DigitalOut led2(LED2); //socket connecting status
 
@@ -66,32 +65,28 @@ void ServerThreadFunc()
     while (serverIsListened) {
         bool isClientConnected = checkClientConnection();
 
-        while(isClientConnected) {
+        if(isClientConnected) {
             led2 = true;
 
             char buffer[1024] = {};
-            int receiveStatus = client.receive(buffer, sizeof(buffer) - 1);
+            int receiveStatus = client.receive_all(buffer, sizeof(buffer) - 1);
 
             switch(receiveStatus) {
                 case 0:
                     DEBUG_PRINT("[Server Thread]recieved buffer is empty.\n\r");
-                    isClientIsConnected = false;
                     break;
                 case -1:
                     DEBUG_PRINT("[Server Thread]failed to read data from client.\n\r");
-                    isClientIsConnected = false;
                     break;
                 default:
-                    requestAction(buffer);
                     DEBUG_PRINT("[Server Thread]Recieved Data: %d\n\r\n\r%.*s\n\r",strlen(buffer), strlen(buffer), buffer);
+                    requestAction(buffer);
                     break;
             }
 
-            if(isClientIsConnected){
-                DEBUG_PRINT("[Server Thread]close connection.\n\r[Server Thread]tcp server is listening...\n\r");
-                client.close();
-                led2 = false;
-            }
+            DEBUG_PRINT("[Server Thread]close connection.\n\r");
+            client.close();
+            led2 = false;
         }
     }
 }
@@ -124,8 +119,6 @@ void requestAction(char* requestMessage)
 
         sendPage();
     }
-
-    clientIsConnected = false;
 }
 
 void connectToDHCPServer()
@@ -190,7 +183,7 @@ bool setupTCPSocket()
             DEBUG_PRINT("[Server Thread]tcp server listen failed.\n\r");
             result = false;
         } else {
-            DEBUG_PRINT("[Server Thread]tcp server is listening...\n\r");
+            DEBUG_PRINT("[Server Thread]tcp server listening started...\n\r");
             result = true;
         }
     }
@@ -206,6 +199,8 @@ void setupEthernetInterface()
 }
 bool checkClientConnection()
 {
+    DEBUG_PRINT("[Server Thread]waiting for client connection...\n\r");
+
     bool result = false;
 
     //blocking mode(never timeout)
